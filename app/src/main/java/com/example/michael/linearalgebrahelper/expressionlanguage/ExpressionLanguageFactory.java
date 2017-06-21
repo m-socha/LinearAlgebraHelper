@@ -90,7 +90,7 @@ public class ExpressionLanguageFactory {
         DFA.State projState = new DFA.State(TOKEN_PROJ, true);
         lettersPROState.addTransition('j', projState);
 
-        DFA.State lettersDEState = new DFA.State("letters de", false);
+        DFA.State lettersDEState = new DFA.State("let ters de", false);
         letterDState.addTransition('e', lettersDEState);
         DFA.State detState = new DFA.State(TOKEN_DET, true);
         lettersDEState.addTransition('t', detState);
