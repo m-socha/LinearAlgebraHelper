@@ -1,5 +1,8 @@
 package com.example.michael.linearalgebrahelper.expressionlanguage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import parsingtools.ContextFreeGrammar;
 import parsingtools.DFA;
 
@@ -32,6 +35,40 @@ public class ExpressionLanguageFactory {
     public static final String TOKEN_NUMBER = "NUMBER";
 
     private static DFA expressionLanguageDfa;
+
+    public static final String EXPRESSION = "EXPRESSION";
+
+    public static final String MATRIX_EXPRESSION = "MATRIX_EXPRESSION";
+    public static final String VECTOR_EXPRESSION = "VECTOR_EXPRESSION";
+    public static final String NUMBER_EXPRESSION = "NUMBER_EXPRESSION";
+
+    public static final String MATRIX_BRACKET_EXPRESSION = "MATRIX_BRACKET_EXPRESSION";
+    public static final String MATRIX_PLUS_EXPRESSION = "MATRIX_PLUS_EXPRESSION";
+    public static final String MATRIX_MINUS_EXPRESSION = "MATRIX_MINUS_EXPRESSION";
+    public static final String MATRIX_MULT_EXPRESSION = "MATRIX_MULT_EXPRESSION";
+    public static final String MATRIX_EXP_EXPRESSION = "MATRIX_EXP_EXPRESSION";
+    public static final String MATRIX_SCALE_EXPRESSION = "MATRIX_SCALE_EXPRESSION";
+
+    public static final String VECTOR_BRACKET_EXPRESSION = "VECTOR_BRACKET_EXPRESSION";
+    public static final String VECTOR_PROJ_EXPRESSION = "VECTOR_PROJ_EXPRESSION";
+    public static final String VECTOR_PLUS_EXPRESSION = "VECTOR_PLUS_EXPRESSION";
+    public static final String VECTOR_MINUS_EXPRESSION = "VECTOR_MINUS_EXPRESSION";
+    public static final String VECTOR_CROSS_EXPRESSION = "VECTOR_CROSS_EXPRESSION";
+    public static final String VECTOR_MULT_MATRIX_EXPRESSION = "VECTOR_MULT_MATRIX_EXPRESSION";
+    public static final String VECTOR_SCALE_EXPRESSION = "VECTOR_SCALE_EXPRESSION";
+
+    public static final String NUMBER_BRACKET_EXPRESSION = "NUMBER_BRACKET_EXPRESSION";
+    public static final String NUMBER_PLUS_EXPRESSION = "NUMBER_PLUS_EXPRESSION";
+    public static final String NUMBER_MINUS_EXPRESSION = "NUMBER_TIMES_EXPRESSION";
+    public static final String NUMBER_TIMES_EXPRESSION = "NUMBER_BRACKET_EXPRESSION";
+    public static final String NUMBER_DIV_EXPRESSION = "NUMBER_DIV_EXPRESSION";
+    public static final String NUMBER_EXP_EXPRESSION = "NUMBER_EXP_EXPRESSION";
+    public static final String NUMBER_ABS_EXPRESSION = "NUMBER_ABS_EXPRESSION";
+    public static final String VECTOR_DOT_EXPRESSION = "VECTOR_DOT_EXPRESSION";
+    public static final String VECTOR_MAGNITUDE_EXPRESSION = "VECTOR_MAGNITUDE_EXPRESSION";
+    public static final String MATRIX_DET_EXPRESSION = "MATRIX_DET_EXPRESSION";
+
+    private static ContextFreeGrammar expressionLanguageGrammar;
 
     public static DFA getDfa() {
         DFA dfa = new DFA();
@@ -117,10 +154,78 @@ public class ExpressionLanguageFactory {
         return dfa;
     }
 
-    private static ContextFreeGrammar expressionLanguageGrammar;
-
     public static ContextFreeGrammar getContextFreeGrammar() {
         ContextFreeGrammar grammar = new ContextFreeGrammar();
+
+        grammar.addRule(EXPRESSION, Arrays.asList(MATRIX_EXPRESSION));
+        grammar.addRule(EXPRESSION, Arrays.asList(VECTOR_EXPRESSION));
+        grammar.addRule(EXPRESSION, Arrays.asList(NUMBER_EXPRESSION));
+
+        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(TOKEN_MATRIX));
+        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_BRACKET_EXPRESSION));
+        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_PLUS_EXPRESSION));
+        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_MINUS_EXPRESSION));
+        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_MULT_EXPRESSION));
+        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXP_EXPRESSION));
+        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_SCALE_EXPRESSION));
+
+        grammar.addRule(MATRIX_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, MATRIX_EXPRESSION, TOKEN_RIGHT_BRACKET));
+        grammar.addRule(MATRIX_PLUS_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_PLUS, MATRIX_EXPRESSION));
+        grammar.addRule(MATRIX_MINUS_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_MINUS, MATRIX_EXPRESSION));
+        grammar.addRule(MATRIX_MULT_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, MATRIX_EXPRESSION));
+        grammar.addRule(MATRIX_MULT_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, MATRIX_EXPRESSION));
+        grammar.addRule(MATRIX_EXP_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_EXP, NUMBER_EXPRESSION));
+        grammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, MATRIX_EXPRESSION));
+        grammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, MATRIX_EXPRESSION));
+        grammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, NUMBER_EXPRESSION));
+        grammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
+
+        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(TOKEN_VECTOR));
+        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_BRACKET_EXPRESSION));
+        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_PROJ_EXPRESSION));
+        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_PLUS_EXPRESSION));
+        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_MINUS_EXPRESSION));
+        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_CROSS_EXPRESSION));
+        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_MULT_MATRIX_EXPRESSION));
+        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_SCALE_EXPRESSION));
+
+        grammar.addRule(VECTOR_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, VECTOR_EXPRESSION, TOKEN_RIGHT_BRACKET));
+        grammar.addRule(VECTOR_PROJ_EXPRESSION, Arrays.asList(TOKEN_PROJ, TOKEN_LEFT_BRACKET, VECTOR_EXPRESSION, TOKEN_COMMA, VECTOR_EXPRESSION, TOKEN_RIGHT_BRACKET));
+        grammar.addRule(VECTOR_PLUS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_PLUS, VECTOR_EXPRESSION));
+        grammar.addRule(VECTOR_MINUS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_MINUS, VECTOR_EXPRESSION));
+        grammar.addRule(VECTOR_CROSS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_CROSS, VECTOR_EXPRESSION));
+        grammar.addRule(VECTOR_MULT_MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, VECTOR_EXPRESSION));
+        grammar.addRule(VECTOR_MULT_MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, VECTOR_EXPRESSION));
+        grammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, VECTOR_EXPRESSION));
+        grammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, VECTOR_EXPRESSION));
+        grammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, NUMBER_EXPRESSION));
+        grammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
+
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(TOKEN_NUMBER));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_BRACKET_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_PLUS_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_MINUS_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_TIMES_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_DIV_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_EXP_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_ABS_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(VECTOR_DOT_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(VECTOR_MAGNITUDE_EXPRESSION));
+        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(MATRIX_DET_EXPRESSION));
+
+        grammar.addRule(NUMBER_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, NUMBER_EXPRESSION, TOKEN_RIGHT_BRACKET));
+        grammar.addRule(NUMBER_PLUS_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_PLUS, NUMBER_EXPRESSION));
+        grammar.addRule(NUMBER_MINUS_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_MINUS, NUMBER_EXPRESSION));
+        grammar.addRule(NUMBER_TIMES_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, NUMBER_EXPRESSION));
+        grammar.addRule(NUMBER_TIMES_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
+        grammar.addRule(NUMBER_DIV_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_DIV, NUMBER_EXPRESSION));
+        grammar.addRule(NUMBER_EXP_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_EXP, NUMBER_EXPRESSION));
+        grammar.addRule(NUMBER_ABS_EXPRESSION, Arrays.asList(TOKEN_ABS_SLASH, NUMBER_EXPRESSION, TOKEN_ABS_SLASH));
+        grammar.addRule(VECTOR_DOT_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_DOT, VECTOR_EXPRESSION));
+        grammar.addRule(VECTOR_MAGNITUDE_EXPRESSION, Arrays.asList(TOKEN_ABS_SLASH, VECTOR_EXPRESSION, TOKEN_ABS_SLASH));
+        grammar.addRule(MATRIX_DET_EXPRESSION, Arrays.asList(TOKEN_DET, TOKEN_LEFT_BRACKET, MATRIX_EXPRESSION, TOKEN_RIGHT_BRACKET));
+
+        grammar.setLeadingNonterminal(EXPRESSION);
 
         return grammar;
     }
