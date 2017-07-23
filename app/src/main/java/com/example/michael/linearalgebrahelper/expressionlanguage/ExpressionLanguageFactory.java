@@ -71,162 +71,167 @@ public class ExpressionLanguageFactory {
     private static ContextFreeGrammar expressionLanguageGrammar;
 
     public static DFA getDfa() {
-        DFA dfa = new DFA();
+        if (expressionLanguageDfa == null) {
+            expressionLanguageDfa = new DFA();
 
-        DFA.State sourceState = new DFA.State("source", false);
-        dfa.setSourceState(sourceState);
+            DFA.State sourceState = new DFA.State("source", false);
+            expressionLanguageDfa.setSourceState(sourceState);
 
-        DFA.State commaState = new DFA.State(TOKEN_COMMA, true);
-        sourceState.addTransition(',', commaState);
+            DFA.State commaState = new DFA.State(TOKEN_COMMA, true);
+            sourceState.addTransition(',', commaState);
 
-        DFA.State leftBracketState = new DFA.State(TOKEN_LEFT_BRACKET, true);
-        sourceState.addTransition('(', leftBracketState);
+            DFA.State leftBracketState = new DFA.State(TOKEN_LEFT_BRACKET, true);
+            sourceState.addTransition('(', leftBracketState);
 
-        DFA.State rightBracketState = new DFA.State(TOKEN_RIGHT_BRACKET, true);
-        sourceState.addTransition(')', rightBracketState);
+            DFA.State rightBracketState = new DFA.State(TOKEN_RIGHT_BRACKET, true);
+            sourceState.addTransition(')', rightBracketState);
 
-        DFA.State absSlashState = new DFA.State(TOKEN_ABS_SLASH, true);
-        sourceState.addTransition('|', absSlashState);
+            DFA.State absSlashState = new DFA.State(TOKEN_ABS_SLASH, true);
+            sourceState.addTransition('|', absSlashState);
 
-        DFA.State plusState = new DFA.State(TOKEN_PLUS, true);
-        sourceState.addTransition('+', plusState);
+            DFA.State plusState = new DFA.State(TOKEN_PLUS, true);
+            sourceState.addTransition('+', plusState);
 
-        DFA.State minusState = new DFA.State(TOKEN_MINUS, true);
-        sourceState.addTransition('-', minusState);
+            DFA.State minusState = new DFA.State(TOKEN_MINUS, true);
+            sourceState.addTransition('-', minusState);
 
-        DFA.State timesState = new DFA.State(TOKEN_TIMES, true);
-        sourceState.addTransition('*', timesState);
+            DFA.State timesState = new DFA.State(TOKEN_TIMES, true);
+            sourceState.addTransition('*', timesState);
 
-        DFA.State divState = new DFA.State(TOKEN_DIV, true);
-        sourceState.addTransition('/', divState);
+            DFA.State divState = new DFA.State(TOKEN_DIV, true);
+            sourceState.addTransition('/', divState);
 
-        DFA.State expState = new DFA.State(TOKEN_EXP, true);
-        sourceState.addTransition('^', expState);
+            DFA.State expState = new DFA.State(TOKEN_EXP, true);
+            sourceState.addTransition('^', expState);
 
-        DFA.State letterDState = null;
-        for (char c : VECTOR_CHARS) {
-            DFA.State charState = new DFA.State(TOKEN_VECTOR, true);
-            sourceState.addTransition(c, charState);
+            DFA.State letterDState = null;
+            for (char c : VECTOR_CHARS) {
+                DFA.State charState = new DFA.State(TOKEN_VECTOR, true);
+                sourceState.addTransition(c, charState);
 
-            if (c == 'd') {
-                letterDState = charState;
+                if (c == 'd') {
+                    letterDState = charState;
+                }
             }
+
+            for (char c : MATRIX_CHARS) {
+                DFA.State charState = new DFA.State(TOKEN_MATRIX, true);
+                sourceState.addTransition(c, charState);
+            }
+
+            DFA.State letterPState = new DFA.State("letter p", false);
+            sourceState.addTransition('p', letterPState);
+            DFA.State lettersPRState = new DFA.State("letters pr", false);
+            letterPState.addTransition('r', lettersPRState);
+            DFA.State lettersPROState = new DFA.State("letters pro", false);
+            lettersPRState.addTransition('o', lettersPROState);
+            DFA.State projState = new DFA.State(TOKEN_PROJ, true);
+            lettersPROState.addTransition('j', projState);
+
+            DFA.State lettersDEState = new DFA.State("letters de", false);
+            letterDState.addTransition('e', lettersDEState);
+            DFA.State detState = new DFA.State(TOKEN_DET, true);
+            lettersDEState.addTransition('t', detState);
+
+            DFA.State dotState = new DFA.State(TOKEN_DOT, true);
+            sourceState.addTransition('·', dotState);
+
+            DFA.State crossState = new DFA.State(TOKEN_CROSS, true);
+            sourceState.addTransition('X', crossState);
+
+            DFA.State numNoDecState = new DFA.State(TOKEN_NUMBER, true);
+            DFA.State decState = new DFA.State("decimal", false);
+            DFA.State numAfterDecState = new DFA.State(TOKEN_NUMBER, true);
+
+            for (char c : DIGITS) {
+                sourceState.addTransition(c, numNoDecState);
+                numNoDecState.addTransition(c, numNoDecState);
+                decState.addTransition(c, numAfterDecState);
+                numAfterDecState.addTransition(c, numAfterDecState);
+            }
+            sourceState.addTransition('.', decState);
+            numNoDecState.addTransition('.', decState);
         }
 
-        for (char c : MATRIX_CHARS) {
-            DFA.State charState = new DFA.State(TOKEN_MATRIX, true);
-            sourceState.addTransition(c, charState);
-        }
-
-        DFA.State letterPState = new DFA.State("letter p", false);
-        sourceState.addTransition('p', letterPState);
-        DFA.State lettersPRState = new DFA.State("letters pr", false);
-        letterPState.addTransition('r', lettersPRState);
-        DFA.State lettersPROState = new DFA.State("letters pro", false);
-        lettersPRState.addTransition('o', lettersPROState);
-        DFA.State projState = new DFA.State(TOKEN_PROJ, true);
-        lettersPROState.addTransition('j', projState);
-
-        DFA.State lettersDEState = new DFA.State("letters de", false);
-        letterDState.addTransition('e', lettersDEState);
-        DFA.State detState = new DFA.State(TOKEN_DET, true);
-        lettersDEState.addTransition('t', detState);
-
-        DFA.State dotState = new DFA.State(TOKEN_DOT, true);
-        sourceState.addTransition('·', dotState);
-
-        DFA.State crossState = new DFA.State(TOKEN_CROSS, true);
-        sourceState.addTransition('X', crossState);
-
-        DFA.State numNoDecState = new DFA.State(TOKEN_NUMBER, true);
-        DFA.State decState = new DFA.State("decimal", false);
-        DFA.State numAfterDecState = new DFA.State(TOKEN_NUMBER, true);
-
-        for (char c : DIGITS) {
-            sourceState.addTransition(c, numNoDecState);
-            numNoDecState.addTransition(c, numNoDecState);
-            decState.addTransition(c, numAfterDecState);
-            numAfterDecState.addTransition(c, numAfterDecState);
-        }
-        sourceState.addTransition('.', decState);
-        numNoDecState.addTransition('.', decState);
-
-        return dfa;
+        return expressionLanguageDfa;
     }
 
     public static ContextFreeGrammar getContextFreeGrammar() {
-        ContextFreeGrammar grammar = new ContextFreeGrammar();
+        if (expressionLanguageGrammar == null) {
+            expressionLanguageGrammar = new ContextFreeGrammar();
 
-        grammar.addRule(EXPRESSION, Arrays.asList(MATRIX_EXPRESSION));
-        grammar.addRule(EXPRESSION, Arrays.asList(VECTOR_EXPRESSION));
-        grammar.addRule(EXPRESSION, Arrays.asList(NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(EXPRESSION, Arrays.asList(MATRIX_EXPRESSION));
+            expressionLanguageGrammar.addRule(EXPRESSION, Arrays.asList(VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(EXPRESSION, Arrays.asList(NUMBER_EXPRESSION));
 
-        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(TOKEN_MATRIX));
-        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_BRACKET_EXPRESSION));
-        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_PLUS_EXPRESSION));
-        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_MINUS_EXPRESSION));
-        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_MULT_EXPRESSION));
-        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXP_EXPRESSION));
-        grammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_SCALE_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_EXPRESSION, Arrays.asList(TOKEN_MATRIX));
+            expressionLanguageGrammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_BRACKET_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_PLUS_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_MINUS_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_MULT_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXP_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_EXPRESSION, Arrays.asList(MATRIX_SCALE_EXPRESSION));
 
-        grammar.addRule(MATRIX_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, MATRIX_EXPRESSION, TOKEN_RIGHT_BRACKET));
-        grammar.addRule(MATRIX_PLUS_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_PLUS, MATRIX_EXPRESSION));
-        grammar.addRule(MATRIX_MINUS_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_MINUS, MATRIX_EXPRESSION));
-        grammar.addRule(MATRIX_MULT_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, MATRIX_EXPRESSION));
-        grammar.addRule(MATRIX_MULT_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, MATRIX_EXPRESSION));
-        grammar.addRule(MATRIX_EXP_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_EXP, NUMBER_EXPRESSION));
-        grammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, MATRIX_EXPRESSION));
-        grammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, MATRIX_EXPRESSION));
-        grammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, NUMBER_EXPRESSION));
-        grammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, MATRIX_EXPRESSION, TOKEN_RIGHT_BRACKET));
+            expressionLanguageGrammar.addRule(MATRIX_PLUS_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_PLUS, MATRIX_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_MINUS_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_MINUS, MATRIX_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_MULT_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, MATRIX_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_MULT_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, MATRIX_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_EXP_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_EXP, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, MATRIX_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, MATRIX_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(MATRIX_SCALE_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
 
-        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(TOKEN_VECTOR));
-        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_BRACKET_EXPRESSION));
-        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_PROJ_EXPRESSION));
-        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_PLUS_EXPRESSION));
-        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_MINUS_EXPRESSION));
-        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_CROSS_EXPRESSION));
-        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_MULT_MATRIX_EXPRESSION));
-        grammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_SCALE_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_EXPRESSION, Arrays.asList(TOKEN_VECTOR));
+            expressionLanguageGrammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_BRACKET_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_PROJ_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_PLUS_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_MINUS_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_CROSS_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_MULT_MATRIX_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_EXPRESSION, Arrays.asList(VECTOR_SCALE_EXPRESSION));
 
-        grammar.addRule(VECTOR_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, VECTOR_EXPRESSION, TOKEN_RIGHT_BRACKET));
-        grammar.addRule(VECTOR_PROJ_EXPRESSION, Arrays.asList(TOKEN_PROJ, TOKEN_LEFT_BRACKET, VECTOR_EXPRESSION, TOKEN_COMMA, VECTOR_EXPRESSION, TOKEN_RIGHT_BRACKET));
-        grammar.addRule(VECTOR_PLUS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_PLUS, VECTOR_EXPRESSION));
-        grammar.addRule(VECTOR_MINUS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_MINUS, VECTOR_EXPRESSION));
-        grammar.addRule(VECTOR_CROSS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_CROSS, VECTOR_EXPRESSION));
-        grammar.addRule(VECTOR_MULT_MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, VECTOR_EXPRESSION));
-        grammar.addRule(VECTOR_MULT_MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, VECTOR_EXPRESSION));
-        grammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, VECTOR_EXPRESSION));
-        grammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, VECTOR_EXPRESSION));
-        grammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, NUMBER_EXPRESSION));
-        grammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, VECTOR_EXPRESSION, TOKEN_RIGHT_BRACKET));
+            expressionLanguageGrammar.addRule(VECTOR_PROJ_EXPRESSION, Arrays.asList(TOKEN_PROJ, TOKEN_LEFT_BRACKET, VECTOR_EXPRESSION, TOKEN_COMMA, VECTOR_EXPRESSION, TOKEN_RIGHT_BRACKET));
+            expressionLanguageGrammar.addRule(VECTOR_PLUS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_PLUS, VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_MINUS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_MINUS, VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_CROSS_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_CROSS, VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_MULT_MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_MULT_MATRIX_EXPRESSION, Arrays.asList(MATRIX_EXPRESSION, TOKEN_TIMES, VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_SCALE_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
 
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(TOKEN_NUMBER));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_BRACKET_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_PLUS_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_MINUS_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_TIMES_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_DIV_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_EXP_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_ABS_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(VECTOR_DOT_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(VECTOR_MAGNITUDE_EXPRESSION));
-        grammar.addRule(NUMBER_EXPRESSION, Arrays.asList(MATRIX_DET_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(TOKEN_NUMBER));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_BRACKET_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_PLUS_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_MINUS_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_TIMES_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_DIV_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_EXP_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(NUMBER_ABS_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(VECTOR_DOT_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(VECTOR_MAGNITUDE_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXPRESSION, Arrays.asList(MATRIX_DET_EXPRESSION));
 
-        grammar.addRule(NUMBER_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, NUMBER_EXPRESSION, TOKEN_RIGHT_BRACKET));
-        grammar.addRule(NUMBER_PLUS_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_PLUS, NUMBER_EXPRESSION));
-        grammar.addRule(NUMBER_MINUS_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_MINUS, NUMBER_EXPRESSION));
-        grammar.addRule(NUMBER_TIMES_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, NUMBER_EXPRESSION));
-        grammar.addRule(NUMBER_TIMES_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
-        grammar.addRule(NUMBER_DIV_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_DIV, NUMBER_EXPRESSION));
-        grammar.addRule(NUMBER_EXP_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_EXP, NUMBER_EXPRESSION));
-        grammar.addRule(NUMBER_ABS_EXPRESSION, Arrays.asList(TOKEN_ABS_SLASH, NUMBER_EXPRESSION, TOKEN_ABS_SLASH));
-        grammar.addRule(VECTOR_DOT_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_DOT, VECTOR_EXPRESSION));
-        grammar.addRule(VECTOR_MAGNITUDE_EXPRESSION, Arrays.asList(TOKEN_ABS_SLASH, VECTOR_EXPRESSION, TOKEN_ABS_SLASH));
-        grammar.addRule(MATRIX_DET_EXPRESSION, Arrays.asList(TOKEN_DET, TOKEN_LEFT_BRACKET, MATRIX_EXPRESSION, TOKEN_RIGHT_BRACKET));
+            expressionLanguageGrammar.addRule(NUMBER_BRACKET_EXPRESSION, Arrays.asList(TOKEN_LEFT_BRACKET, NUMBER_EXPRESSION, TOKEN_RIGHT_BRACKET));
+            expressionLanguageGrammar.addRule(NUMBER_PLUS_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_PLUS, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_MINUS_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_MINUS, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_TIMES_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_TIMES_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_TIMES, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_DIV_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_DIV, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_EXP_EXPRESSION, Arrays.asList(NUMBER_EXPRESSION, TOKEN_EXP, NUMBER_EXPRESSION));
+            expressionLanguageGrammar.addRule(NUMBER_ABS_EXPRESSION, Arrays.asList(TOKEN_ABS_SLASH, NUMBER_EXPRESSION, TOKEN_ABS_SLASH));
+            expressionLanguageGrammar.addRule(VECTOR_DOT_EXPRESSION, Arrays.asList(VECTOR_EXPRESSION, TOKEN_DOT, VECTOR_EXPRESSION));
+            expressionLanguageGrammar.addRule(VECTOR_MAGNITUDE_EXPRESSION, Arrays.asList(TOKEN_ABS_SLASH, VECTOR_EXPRESSION, TOKEN_ABS_SLASH));
+            expressionLanguageGrammar.addRule(MATRIX_DET_EXPRESSION, Arrays.asList(TOKEN_DET, TOKEN_LEFT_BRACKET, MATRIX_EXPRESSION, TOKEN_RIGHT_BRACKET));
 
-        grammar.setLeadingNonterminal(EXPRESSION);
+            expressionLanguageGrammar.setLeadingNonterminal(EXPRESSION);
+        }
 
-        return grammar;
+
+        return expressionLanguageGrammar;
     }
 }
